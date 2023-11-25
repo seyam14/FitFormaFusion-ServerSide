@@ -30,6 +30,16 @@ async function run() {
 
     // user 
     const userCollection = client.db('FitFormaFusionDB').collection('user');
+
+    const FeaturesCollection = client.db('FitFormaFusionDB').collection('features');
+
+    // features
+    app.get('/features', async (req, res) => {
+        const cursor = FeaturesCollection.find();
+        const features = await cursor.toArray();
+        res.send(features);
+    })
+
    
 
     // user api
