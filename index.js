@@ -32,12 +32,18 @@ async function run() {
     const userCollection = client.db('FitFormaFusionDB').collection('user');
 
     const FeaturesCollection = client.db('FitFormaFusionDB').collection('features');
+    const SuccessStoriesCollection = client.db("FitFormaFusionDB").collection("SuccessStories");
 
     // features
     app.get('/features', async (req, res) => {
         const cursor = FeaturesCollection.find();
         const features = await cursor.toArray();
         res.send(features);
+    })
+    // SuccessStories
+    app.get('/SuccessStories', async(req, res) =>{
+        const result = await SuccessStoriesCollection.find().toArray();
+        res.send(result);
     })
 
    
