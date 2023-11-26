@@ -40,6 +40,8 @@ async function run() {
     const NewsletterCollection = client.db("FitFormaFusionDB").collection("newsletterInfo");
     const trainerCollection = client.db("FitFormaFusionDB").collection("trainer");
 
+    const BecomeTrainerCollection = client.db("FitFormaFusionDB").collection("becomeTrainer");
+
     // features
     app.get('/features', async (req, res) => {
         const cursor = FeaturesCollection.find();
@@ -72,9 +74,16 @@ async function run() {
     app.get('/trainer/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await trainerCollection.find().toArray(query);
+      const result = await trainerCollection.findOne(query);
       res.send(result);
   })
+  // becomeTrainer
+  app.post('/becomeTrainer', async (req, res) => {
+    const FormData = req.body;
+    console.log(FormData);
+    const result = await BecomeTrainerCollection.insertOne(FormData);
+    res.send(result);
+});
 
 
    
