@@ -42,6 +42,8 @@ async function run() {
 
     const BecomeTrainerCollection = client.db("FitFormaFusionDB").collection("becomeTrainer");
 
+    const PhotoCollection = client.db("FitFormaFusionDB").collection("photo");
+
     // features
     app.get('/features', async (req, res) => {
         const cursor = FeaturesCollection.find();
@@ -84,6 +86,12 @@ async function run() {
     const result = await BecomeTrainerCollection.insertOne(FormData);
     res.send(result);
 });
+
+  // photo
+  app.get('/photo', async(req, res) =>{
+    const result = await PhotoCollection.find().toArray();
+    res.send(result);
+})
 
 
    
