@@ -43,6 +43,9 @@ async function run() {
     const BecomeTrainerCollection = client.db("FitFormaFusionDB").collection("becomeTrainer");
 
     const PhotoCollection = client.db("FitFormaFusionDB").collection("photo");
+    // weeklySchedule
+    const weeklyScheduleCollection = client.db("FitFormaFusionDB").collection("weeklySchedule");
+
 
     // features
     app.get('/features', async (req, res) => {
@@ -79,19 +82,24 @@ async function run() {
       const result = await trainerCollection.findOne(query);
       res.send(result);
   })
-  // becomeTrainer
-  app.post('/becomeTrainer', async (req, res) => {
-    const FormData = req.body;
-    console.log(FormData);
-    const result = await BecomeTrainerCollection.insertOne(FormData);
-    res.send(result);
-});
+      // becomeTrainer
+      app.post('/becomeTrainer', async (req, res) => {
+        const FormData = req.body;
+        console.log(FormData);
+        const result = await BecomeTrainerCollection.insertOne(FormData);
+        res.send(result);
+    });
 
-  // photo
-  app.get('/photo', async(req, res) =>{
-    const result = await PhotoCollection.find().toArray();
-    res.send(result);
-})
+    // photo
+    app.get('/photo', async(req, res) =>{
+        const result = await PhotoCollection.find().toArray();
+        res.send(result);
+    })
+    // weeklySchedule
+    app.get('/weeklySchedule', async(req, res) =>{
+        const result = await weeklyScheduleCollection.find().toArray();
+        res.send(result);
+    })
 
 
    
