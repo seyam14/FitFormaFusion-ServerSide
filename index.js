@@ -71,6 +71,11 @@ async function run() {
         const result = await NewsletterCollection.insertOne(SubscribeUser);
         res.send(result);
     });
+
+    app.get('/newsletterInfo', async(req, res) =>{
+      const result = await NewsletterCollection.find().toArray();
+      res.send(result);
+  })
     // trainer
     app.get('/trainer', async(req, res) =>{
         const result = await trainerCollection.find().toArray();
