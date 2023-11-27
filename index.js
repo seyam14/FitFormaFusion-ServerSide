@@ -45,8 +45,9 @@ async function run() {
     const PhotoCollection = client.db("FitFormaFusionDB").collection("photo");
     // weeklySchedule
     const weeklyScheduleCollection = client.db("FitFormaFusionDB").collection("weeklySchedule");
-
-
+    // posts
+    const postsCollection = client.db("FitFormaFusionDB").collection("posts");
+ 
     // features
     app.get('/features', async (req, res) => {
         const cursor = FeaturesCollection.find();
@@ -100,6 +101,28 @@ async function run() {
         const result = await weeklyScheduleCollection.find().toArray();
         res.send(result);
     })
+    // POSTS
+    app.get('/posts', async (req, res) => {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 6;
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+    
+      try {
+        const allPosts = await postsCollection.find({}).toArray();
+        const paginatedPosts = allPosts.slice(startIndex, endIndex);
+    
+        res.json({
+          posts: paginatedPosts,
+          currentPage: page,
+          totalPages: Math.ceil(allPosts.length / limit),
+        });
+      } catch (error) {
+        console.error('Error fetching posts from MongoDB:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
 
 
    
