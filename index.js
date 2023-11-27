@@ -96,7 +96,11 @@ async function run() {
         console.log(FormData);
         const result = await BecomeTrainerCollection.insertOne(FormData);
         res.send(result);
-    });
+      });
+      app.get('/becomeTrainer', async(req, res) =>{
+        const result = await BecomeTrainerCollection.find().toArray();
+        res.send(result);
+    })
 
     // photo
     app.get('/photo', async(req, res) =>{
