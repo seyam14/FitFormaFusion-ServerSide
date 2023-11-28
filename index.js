@@ -144,13 +144,6 @@ async function run() {
         const users = await cursor.toArray();
         res.send(users);
     })
-
-    app.delete('/user/:id',  async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await userCollection.deleteOne(query);
-      res.send(result);
-    })
     
     app.post('/user', async (req, res) => {
         const user = req.body;
@@ -166,6 +159,26 @@ async function run() {
         const result = await userCollection.insertOne(user);
         res.send(result);
     });
+
+    // verifyToken, verifyAdmin,
+    app.patch('/user/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'admin'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+    // verifyToken, verifyAdmin,
+    app.delete('/user/:id',  async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    })
 
 
 
