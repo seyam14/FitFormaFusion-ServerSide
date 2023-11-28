@@ -50,6 +50,8 @@ async function run() {
     const weeklyScheduleCollection = client.db("FitFormaFusionDB").collection("weeklySchedule");
     // posts
     const postsCollection = client.db("FitFormaFusionDB").collection("posts");
+
+    const paymentHistory = [];
      
     // jwt related api
     app.post('/jwt', async (req, res) => {
@@ -245,21 +247,47 @@ async function run() {
 
 
       // payment intent
-      app.post('/createPayMentintent', async (req, res) => {
-        const { price } = req.body;
-        const amount = parseInt(price * 100);
-        console.log(amount, 'amount inside the intent')
-
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: amount,
-          currency: 'usd',
-          payment_method_types: ['card']
-        });
-
-        res.send({
-          clientSecret: paymentIntent.client_secret
-        })
-      });
+      app.post('/create-payment-intent', async (req, res) => {
+        try {
+            const { price, trainerId } = req.body;
+            const amount = parseInt(price * 100);
+            const userId = trainerId
+            console.log(trainerId); 
+    
+            
+            const lastPayment = paymentHistory.find(payment => {
+                return (
+                    payment.userId === userId &&
+                    new Date(payment.timestamp).getMonth() === new Date().getMonth()
+                );
+            });
+    
+            if (lastPayment) {
+                // User has already made a payment in the current month
+                return res.status(400).send({ error: 'User has already made a payment this month' });
+            }
+    
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+    
+            
+            paymentHistory.push({
+                userId: userId,
+                timestamp: new Date().toISOString(),
+                amount: amount
+            });
+    
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            });
+        } catch (error) {
+            console.error('Error creating payment intent:', error);
+            res.status(500).send({ error: 'Error creating payment intent' });
+        }
+    });
 
 
       // becomeTrainer post
