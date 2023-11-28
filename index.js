@@ -262,6 +262,33 @@ async function run() {
       });
 
 
+      // becomeTrainer post
+      app.patch('/becomeTrainer/:Id', async(req, res) =>{
+        try {
+          const id = req.params.Id;
+          const filter = { _id: new ObjectId(id) };
+          const updateDoc = {
+            $set: { role: "trainer" },
+        
+          };
+          const trainer = await BecomeTrainerCollection.findOne(filter)
+          trainer.role = "trainer";
+          delete trainer._id
+          const result = await trainerCollection.insertOne(trainer)
+          const deleted = await BecomeTrainerCollection.deleteOne(filter);
+        
+          res.send(result);
+        
+        } catch (error) {
+          res
+            .status(500)
+            .send({error: true, message: "server side error"});
+        }
+        
+        
+        })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
