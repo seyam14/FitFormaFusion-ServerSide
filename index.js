@@ -231,8 +231,8 @@ async function run() {
       };
     
       const result = await userCollection.updateOne(filter, updateUser);
-  res.send(result);
-    });
+        res.send(result);
+          });
     
 
     // updatedUse
