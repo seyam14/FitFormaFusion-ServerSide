@@ -219,11 +219,23 @@ async function run() {
       res.send({trainer });
     })
 
-
-
-
-
     // 
+    app.patch('/user/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      // Update user's name if provided in the request
+      const updateUser = {
+        $set: {
+        name : req.body.name,
+        },
+      };
+    
+      const result = await userCollection.updateOne(filter, updateUser);
+  res.send(result);
+    });
+    
+
+    // updatedUse
     
     app.post('/user', async (req, res) => {
         const user = req.body;
