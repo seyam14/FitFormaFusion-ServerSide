@@ -152,58 +152,27 @@ async function run() {
         const result = await weeklyScheduleCollection.find().toArray();
         res.send(result);
     })
+    
     // POSTS
-    // app.get('/posts', async (req, res) => {
-    //   const page = parseInt(req.query.page) || 1;
-    //   const limit = parseInt(req.query.limit) || 6;
-    //   const startIndex = (page - 1) * limit;
-    //   const endIndex = page * limit;
-    
-    //   try {
-    //     const allPosts = await postsCollection.find({}).toArray();
-    //     const paginatedPosts = allPosts.slice(startIndex, endIndex);
-    
-    //     res.json({
-    //       posts: paginatedPosts,
-    //       currentPage: page,
-    //       totalPages: Math.ceil(allPosts.length / limit),
-    //     });
-    //   } catch (error) {
-    //     console.error('Error fetching posts from MongoDB:', error);
-    //     res.status(500).json({ error: 'Internal Server Error' });
-    //   }
-    // });
-
-     // GET posts with pagination
-    app.get("/posts", async (req, res) => {
-      const page = parseInt(req.query.page) || 1;
-      const limit = 1;
-      const skip = (page - 1) * limit;
-
-      const total = await postsCollection.countDocuments();
-      const totalPages = Math.ceil(total / limit);
-      const posts = await postsCollection
-        .find()
-        .sort({ _id: -1 })
-        .skip(skip)
-        .limit(limit)
-        .toArray();
-
-      res.send({ posts, totalPages });
+      app.get("/posts", async (req, res) => {
+      try {
+        const posts = await postsCollection.find().sort({ _id: -1 }).toArray();
+        res.send({ posts });
+      } catch (error) {
+        res.status(500).send({ error: "Failed to fetch posts" });
+      }
     });
 
-    // POST a new post
-    app.post("/posts", async (req, res) => {
+    app.post("/posts", verifyToken, async (req, res) => {
       const { title, content } = req.body;
-      if (!title || !content) {
-        return res.status(400).send({ message: "Title and content are required" });
-      }
+      if (!title || !content) return res.status(400).send({ message: "Title and content required" });
 
       const newPost = {
         title,
         content,
         upvotes: 0,
         downvotes: 0,
+        comments: [],
         createdAt: new Date(),
       };
 
@@ -211,37 +180,52 @@ async function run() {
       res.send({ message: "Post created", insertedId: result.insertedId });
     });
 
-    // UPVOTE a post
-    app.post("/posts/:id/upvote", async (req, res) => {
-      const postId = req.params.id;
+    app.post("/posts/:id/upvote", verifyToken, async (req, res) => {
       try {
+        const postId = req.params.id;
         const result = await postsCollection.findOneAndUpdate(
           { _id: new ObjectId(postId) },
           { $inc: { upvotes: 1 } },
           { returnDocument: "after" }
         );
         res.send({ updatedUpvotes: result.value.upvotes });
-      } catch (err) {
+      } catch {
         res.status(400).send({ error: "Invalid post ID" });
       }
     });
 
-    // DOWNVOTE a post
-    app.post("/posts/:id/downvote", async (req, res) => {
-      const postId = req.params.id;
+    app.post("/posts/:id/downvote", verifyToken, async (req, res) => {
       try {
+        const postId = req.params.id;
         const result = await postsCollection.findOneAndUpdate(
           { _id: new ObjectId(postId) },
           { $inc: { downvotes: 1 } },
           { returnDocument: "after" }
         );
         res.send({ updatedDownvotes: result.value.downvotes });
-      } catch (err) {
+      } catch {
         res.status(400).send({ error: "Invalid post ID" });
       }
     });
 
-   
+    app.post("/posts/:id/comment", verifyToken, async (req, res) => {
+      const postId = req.params.id;
+      const { commentText } = req.body;
+      if (!commentText) return res.status(400).send({ error: "Comment text required" });
+
+      const comment = {
+        text: commentText,
+        createdAt: new Date(),
+      };
+
+      const result = await postsCollection.findOneAndUpdate(
+        { _id: new ObjectId(postId) },
+        { $push: { comments: comment } },
+        { returnDocument: "after" }
+      );
+
+      res.send({ message: "Comment added", comments: result.value.comments });
+    });
 
     // user api
     app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
