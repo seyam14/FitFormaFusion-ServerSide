@@ -50,6 +50,7 @@ async function run() {
     const weeklyScheduleCollection = client.db("FitFormaFusionDB").collection("weeklySchedule");
     // posts
     const postsCollection = client.db("FitFormaFusionDB").collection("posts");
+    const balancesCollection = client.db("FitFormaFusionDB").collection("balances");
 
     const paymentHistory = [];
      
@@ -152,7 +153,7 @@ async function run() {
         const result = await weeklyScheduleCollection.find().toArray();
         res.send(result);
     })
-    
+
     // POSTS
       app.get("/posts", async (req, res) => {
       try {
@@ -226,6 +227,63 @@ async function run() {
 
       res.send({ message: "Comment added", comments: result.value.comments });
     });
+    
+    // balances api
+     // 🟢 Get all balances
+    app.get("/balances", async (req, res) => {
+      try {
+        const balances = await balancesCollection.find().toArray();
+        res.json(balances);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch balances" });
+      }
+    });
+
+    // 🔵 Get a single balance
+    app.get("/balances/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const balance = await balancesCollection.findOne({ _id: new ObjectId(id) });
+        res.json(balance);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch balance" });
+      }
+    });
+
+    // 🟡 Create new balance
+    app.post("/balances", async (req, res) => {
+      try {
+        const data = req.body;
+        const result = await balancesCollection.insertOne(data);
+        res.json({ message: "Balance added", result });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to add balance" });
+      }
+    });
+
+    // 🟠 Update balance
+    app.put("/balances/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateDoc = { $set: req.body };
+        const result = await balancesCollection.updateOne({ _id: new ObjectId(id) }, updateDoc);
+        res.json({ message: "Balance updated", result });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to update balance" });
+      }
+    });
+
+    // 🔴 Delete balance
+    app.delete("/balances/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await balancesCollection.deleteOne({ _id: new ObjectId(id) });
+        res.json({ message: "Balance deleted", result });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to delete balance" });
+      }
+    });
+    
 
     // user api
     app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
